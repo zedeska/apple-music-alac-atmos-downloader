@@ -92,7 +92,11 @@ type SongInfo struct {
 
 func loadConfig() error {
 	// 读取config.yaml文件内容
-	data, err := ioutil.ReadFile("/root/config.yaml")
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal( err )
+	}
+	data, err := ioutil.ReadFile(dirname+"/config.yaml")
 	if err != nil {
 		return err
 	}
