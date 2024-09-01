@@ -93,7 +93,7 @@ type SongInfo struct {
 func loadConfig() error {
 	// 读取config.yaml文件内容
 	dirname, err := os.UserHomeDir()
-	data, err := ioutil.ReadFile(dirname+"/config.yaml")
+	data, err := ioutil.ReadFile(dirname + "/config.yaml")
 	if err != nil {
 		return err
 	}
@@ -1769,6 +1769,12 @@ func main() {
 		fmt.Printf("load config failed: %v", err)
 		return
 	}
+
+	decrypt_port, _ := strconv.Atoi(os.Args[2])
+	m3u8_port := decrypt_port + 10000
+	config.DecryptM3u8Port = "127.0.0.1:" + string(decrypt_port)
+	config.GetM3u8Port = "127.0.0.1:" + string(m3u8_port)
+
 	token, err := getToken()
 	if err != nil {
 		fmt.Println("Failed to get token.")
@@ -1795,36 +1801,31 @@ func main() {
 		}
 		os.Args = append([]string{os.Args[0]}, newArgs...)
 	}
-	albumTotal := len(os.Args[1:])
-	for albumNum, url := range os.Args[1:] {
-		fmt.Printf("Album %d of %d:\n", albumNum+1, albumTotal)
-		var storefront, albumId string
-		if strings.Contains(url, ".txt") {
-			txtpath = url
-			fileName := filepath.Base(url)
-			parts := strings.SplitN(fileName, "_", 3)
-			storefront = parts[0]
-			albumId = parts[1]
-		} else {
-			if strings.Contains(url, "/playlist/") {
-				storefront, albumId = checkUrlPlaylist(url)
-				txtpath = ""
-			} else {
-				storefront, albumId = checkUrl(url)
-				txtpath = ""
-			}
-		}
 
-		if albumId == "" {
-			fmt.Printf("Invalid URL: %s\n", url)
-			continue
-		}
-		err = rip(albumId, token, storefront, config.MediaUserToken)
-		if err != nil {
-			fmt.Println("Album failed.")
-			fmt.Println(err)
-		}
+	albumTotal := len(os.Args[1])
+	url := os.Args[1]
+	fmt.Printf("Album %d of %d:\n", 1, albumTotal)
+	var storefront, albumId string
+
+	if strings.Contains(url, "/playlist/") {
+		storefront, albumId = checkUrlPlaylist(url)
+		txtpath = ""
+	} else {
+		storefront, albumId = checkUrl(url)
+		txtpath = ""
 	}
+
+	if albumId == "" {
+		fmt.Printf("Invalid URL: %s\n", url)
+		return
+	}
+
+	err = rip(albumId, token, storefront, config.MediaUserToken)
+	if err != nil {
+		fmt.Println("Album failed.")
+		fmt.Println(err)
+	}
+
 	fmt.Printf("=======  Completed %d/%d ###### %d errors!! =======\n", oktrackNum, trackTotalnum, trackTotalnum-oktrackNum)
 }
 
