@@ -1772,8 +1772,8 @@ func main() {
 
 	decrypt_port, _ := strconv.Atoi(os.Args[2])
 	m3u8_port := decrypt_port + 10000
-	config.DecryptM3u8Port = "127.0.0.1:" + string(decrypt_port)
-	config.GetM3u8Port = "127.0.0.1:" + string(m3u8_port)
+	config.DecryptM3u8Port = "127.0.0.1:" + strconv.Itoa(decrypt_port)
+	config.GetM3u8Port = "127.0.0.1:" + strconv.Itoa(m3u8_port)
 
 	token, err := getToken()
 	if err != nil {
